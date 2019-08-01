@@ -2,7 +2,7 @@
 
 # -----------------------------------------------------------------------------
 
-__version__ = '1.18.991'
+__version__ = '1.18.997'
 
 # -----------------------------------------------------------------------------
 
@@ -294,3 +294,6 @@ class Exchange(BaseExchange):
                 self.accounts = await self.fetch_accounts(params)
         self.accountsById = self.index_by(self.accounts, 'id')
         return self.accounts
+
+    async def fetch_ticker(self, symbol, params={}):
+        raise NotSupported('fetch_ticker() not supported yet')
