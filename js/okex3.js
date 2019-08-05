@@ -1319,7 +1319,7 @@ module.exports = class okex3 extends Exchange {
         const defaultType = this.safeString2 (this.options, 'fetchBalance', 'defaultType');
         const type = this.safeString (params, 'type', defaultType);
         if (type === undefined) {
-            throw new ArgumentsRequired (this.id + " fetchBalance requires a type parameter (one of 'account', 'spot', 'margin', 'futures', 'swap').");
+            throw new ArgumentsRequired (this.id + " fetchBalance requires a type parameter (one of 'account', 'spot', 'margin', 'futures', 'swap')");
         }
         const suffix = (type === 'account') ? 'Wallet' : 'Accounts';
         const method = type + 'Get' + suffix;
@@ -2689,6 +2689,9 @@ module.exports = class okex3 extends Exchange {
         const feedback = this.id + ' ' + body;
         if (code === 503) {
             throw new ExchangeError (feedback);
+        }
+        if (!response) {
+            return; // fallback to default error handler
         }
         const exact = this.exceptions['exact'];
         const message = this.safeString (response, 'message');

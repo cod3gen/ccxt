@@ -4,7 +4,7 @@
 
 # -----------------------------------------------------------------------------
 
-__version__ = '1.18.997'
+__version__ = '1.18.1008'
 
 # -----------------------------------------------------------------------------
 
@@ -607,6 +607,14 @@ class Exchange(object):
         return str(dictionary[key]) if key is not None and (key in dictionary) and dictionary[key] is not None else default_value
 
     @staticmethod
+    def safe_string_lower(dictionary, key, default_value=None):
+        return str(dictionary[key]).lower() if key is not None and (key in dictionary) and dictionary[key] is not None else default_value
+
+    @staticmethod
+    def safe_string_upper(dictionary, key, default_value=None):
+        return str(dictionary[key]).upper() if key is not None and (key in dictionary) and dictionary[key] is not None else default_value
+
+    @staticmethod
     def safe_integer(dictionary, key, default_value=None):
         if key is None or (key not in dictionary):
             return default_value
@@ -629,6 +637,14 @@ class Exchange(object):
     @staticmethod
     def safe_string_2(dictionary, key1, key2, default_value=None):
         return Exchange.safe_either(Exchange.safe_string, dictionary, key1, key2, default_value)
+
+    @staticmethod
+    def safe_string_lower_2(dictionary, key1, key2, default_value=None):
+        return Exchange.safe_either(Exchange.safe_string_lower, dictionary, key1, key2, default_value)
+
+    @staticmethod
+    def safe_string_upper_2(dictionary, key1, key2, default_value=None):
+        return Exchange.safe_either(Exchange.safe_string_upper, dictionary, key1, key2, default_value)
 
     @staticmethod
     def safe_integer_2(dictionary, key1, key2, default_value=None):
@@ -1468,10 +1484,16 @@ class Exchange(object):
 
     def parse_ledger(self, data, currency=None, since=None, limit=None, params={}):
         array = self.to_array(data)
-        array = [self.extend(self.parse_ledger_entry(item, currency), params) for item in array]
-        array = self.sort_by(array, 'timestamp')
+        result = []
+        for item in array:
+            entry = self.parse_ledger_entry(item, currency)
+            if isinstance(entry, list):
+                result += [self.extend(i, params) for i in entry]
+            else:
+                result.append(self.extend(entry, params))
+        result = self.sort_by(result, 'timestamp')
         code = currency['code'] if currency else None
-        return self.filter_by_currency_since_limit(array, code, since, limit)
+        return self.filter_by_currency_since_limit(result, code, since, limit)
 
     def parse_transactions(self, transactions, currency=None, since=None, limit=None, params={}):
         array = self.to_array(transactions)
